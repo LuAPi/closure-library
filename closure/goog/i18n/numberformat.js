@@ -52,8 +52,12 @@ goog.require('goog.string');
  */
 goog.i18n.NumberFormat = function(
     pattern, opt_currency, opt_currencyStyle, opt_symbols) {
+  if (opt_currency && !goog.i18n.currency.isValid(opt_currency)) {
+    throw new TypeError('Currency must be valid ISO code');
+  }
+
   /** @const @private {?string} */
-  this.intlCurrencyCode_ = opt_currency || null;
+  this.intlCurrencyCode_ = opt_currency ? opt_currency.toUpperCase() : null;
 
   /** @const @private {number} */
   this.currencyStyle_ =
@@ -205,7 +209,7 @@ goog.i18n.NumberFormat.isEnforceAsciiDigits = function() {
 
 /**
  * Returns the current NumberFormatSymbols.
- * @return {!Object}
+ * @return {?}
  * @private
  */
 goog.i18n.NumberFormat.prototype.getNumberFormatSymbols_ = function() {
@@ -1202,15 +1206,15 @@ goog.i18n.NumberFormat.prototype.parseAffix_ = function(pattern, pos) {
           } else {
             switch (this.currencyStyle_) {
               case goog.i18n.NumberFormat.CurrencyStyle.LOCAL:
-                affix += goog.i18n.currency.getLocalCurrencySign(
+                affix += goog.i18n.currency.getLocalCurrencySignWithFallback(
                     this.getCurrencyCode_());
                 break;
               case goog.i18n.NumberFormat.CurrencyStyle.GLOBAL:
-                affix += goog.i18n.currency.getGlobalCurrencySign(
+                affix += goog.i18n.currency.getGlobalCurrencySignWithFallback(
                     this.getCurrencyCode_());
                 break;
               case goog.i18n.NumberFormat.CurrencyStyle.PORTABLE:
-                affix += goog.i18n.currency.getPortableCurrencySign(
+                affix += goog.i18n.currency.getPortableCurrencySignWithFallback(
                     this.getCurrencyCode_());
                 break;
               default:

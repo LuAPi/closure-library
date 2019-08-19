@@ -988,6 +988,9 @@ goog.nullFunction = function() {};
  *
  * @type {!Function}
  * @throws {Error} when invoked to indicate the method should be overridden.
+ * @deprecated Use "@abstract" annotation instead of goog.abstractMethod in new
+ *     code. See
+ *     https://github.com/google/closure-compiler/wiki/@abstract-classes-and-methods
  */
 goog.abstractMethod = function() {
   throw new Error('unimplemented abstract method');
@@ -2042,9 +2045,19 @@ if (!COMPILED && goog.global.CLOSURE_CSS_NAME_MAPPING) {
  *
  * @param {string} str Translatable string, places holders in the form {$foo}.
  * @param {Object<string, string>=} opt_values Maps place holder name to value.
+ * @param {{html: boolean}=} opt_options Options:
+ *     html: Escape '<' in str to '&lt;'. Used by Closure Templates where the
+ *     generated code size and performance is critical which is why {@link
+ *     goog.html.SafeHtmlFormatter} is not used. The value must be literal true
+ *     or false.
  * @return {string} message with placeholders filled.
  */
-goog.getMsg = function(str, opt_values) {
+goog.getMsg = function(str, opt_values, opt_options) {
+  if (opt_options && opt_options.html) {
+    // Note that '&' is not replaced because the translation can contain HTML
+    // entities.
+    str = str.replace(/</g, '&lt;');
+  }
   if (opt_values) {
     str = str.replace(/\{\$([^}]+)}/g, function(match, key) {
       return (opt_values != null && key in opt_values) ? opt_values[key] :

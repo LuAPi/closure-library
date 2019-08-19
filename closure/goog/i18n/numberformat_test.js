@@ -588,6 +588,13 @@ function testCurrency() {
   assertEquals('$1,234.56', str);
   str = fmt.format(-1234.56);
   assertEquals('-$1,234.56', str);
+
+  // Test lowercase currency code
+  fmt = new goog.i18n.NumberFormat('\u00a4#,##0.00', 'eur');
+  str = fmt.format(1234.56);
+  assertEquals('€1,234.56', str);
+  str = fmt.format(-1234.56);
+  assertEquals('-€1,234.56', str);
 }
 
 function testQuotes() {
@@ -1460,4 +1467,29 @@ function testScientific_ar_rtl() {
       goog.i18n.NumberFormat.Format.SCIENTIFIC, undefined, undefined,
       goog.i18n.NumberFormatSymbols_ar_EG);
   assertEquals('١اس3', scientific.format(1000));
+}
+
+function testUnknownCurrency() {
+  const cases = [
+    // GMD is a known currency where the symbol is itself the ISO Code
+    ['GMD', goog.i18n.NumberFormat.CurrencyStyle.LOCAL, 'GMD100.00'],
+    ['GMD', goog.i18n.NumberFormat.CurrencyStyle.PORTABLE, 'GMD100.00'],
+    ['GMD', goog.i18n.NumberFormat.CurrencyStyle.GLOBAL, 'GMD100.00'],
+    // XXY is an unknown currency
+    ['XXY', goog.i18n.NumberFormat.CurrencyStyle.LOCAL, 'XXY100.00'],
+    ['XXY', goog.i18n.NumberFormat.CurrencyStyle.PORTABLE, 'XXY100.00'],
+    ['XXY', goog.i18n.NumberFormat.CurrencyStyle.GLOBAL, 'XXY100.00'],
+    // Test lowercase currency code
+    ['xxy', goog.i18n.NumberFormat.CurrencyStyle.GLOBAL, 'XXY100.00']
+  ];
+  for (let [isoCode, style, expected] of cases) {
+    const fmt = new goog.i18n.NumberFormat('¤#,##0.00', isoCode, style);
+    assertEquals(expected, fmt.format(100));
+  }
+}
+
+function testThrowsOnInvalidCurrency() {
+  assertThrows(() => {
+    new google.i18n.NumberFormat('¤#,##0.00', 'invalid!');
+  });
 }
