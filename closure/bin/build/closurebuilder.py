@@ -206,7 +206,7 @@ def main():
     version = sys.version_info[:2]
     if version >= (3, 0):
       # Write bytes to stdout
-      out = sys.stdout.buffer
+      out = sys.stdout #sys.stdout.buffer
     else:
       out = sys.stdout
 
